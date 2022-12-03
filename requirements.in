@@ -1,0 +1,5 @@
+keybert==0.6.0
+faiss-cpu==1.6.5
+fast-api
+uvicorn
+pydantic

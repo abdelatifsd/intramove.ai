@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+final_descriptors.pickle
+sentence_models
+sentence_models/
+.sentence_models
+*sentence_models
+
 # C extensions
 *.so
 

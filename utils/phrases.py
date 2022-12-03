@@ -1,0 +1,28 @@
+bullish_phrases = [
+    "improved",
+    "increased",
+    "edged up",
+    "extended gains",
+    "booked gains",
+    "risen over",
+    "closed high",
+    "climbed",
+    "gap shrank",
+    "expanded",
+    "in the green",
+    "high level of",
+]
+bearish_phrases = [
+    "halt",
+    "worsen",
+    "decreased",
+    "continues to fall",
+    "edged lower",
+    "closed lower",
+    "gap widened",
+    "growth slows",
+    "wavered",
+    "retreated further",
+    "in the red",
+    "low level of",
+]
