@@ -17,6 +17,11 @@ app = FastAPI()
 def home():
     return JSONResponse({"text":"welcome to intramove.ai"})
 
+
+@app.post("/analyze")
+def analyze(headline: str = Query(), article: str = Query()):
+    pass
+
 @app.post("/analyze/headline")
 def analyzeHeadline(headline: str = Query(), callback_url: str = Query()):
     document_embedding = initializedFinaIndex.encodeText(
@@ -27,8 +32,10 @@ def analyzeHeadline(headline: str = Query(), callback_url: str = Query()):
     indices = indices.flatten()
 
     selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
+
     output_dict = {"text":headline,
                 "sign":selectedDescriptor.sign,
+                "indicator":selectedDescriptor.indicator,
                 "description":selectedDescriptor.description,
                 "score":str(scores[0])}
 
@@ -54,19 +61,20 @@ def analyzeHeadline(article: str = Query(), callback_url: str = Query()):
         scores, indices = initializedFinaIndex.index.search(document_embedding, 1)
         scores = scores.flatten()
         indices = indices.flatten()
+        if scores[0] > 0.4:
+            selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
+            if selectedDescriptor.sign == "bull":
+                average_score+=scores[0]
+            elif selectedDescriptor.sign == "bear":
+                average_score-=scores[0]
 
-        selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
-        if selectedDescriptor.sign == "bull":
-            average_score+=scores[0]
-        elif selectedDescriptor.sign == "bear":
-            average_score-=scores[0]
+            chunk_analysis = {"chunk":chunk,
+                            "sign":selectedDescriptor.sign,
+                            "indicator":selectedDescriptor.indicator,
+                            "description":selectedDescriptor.description,
+                            "score":str(scores[0])}
 
-        chunk_analysis = {"chunk":chunk,
-                        "sign":selectedDescriptor.sign,
-                        "description":selectedDescriptor.description,
-                        "score":str(scores[0])}
-
-        chunks_analysis.append(chunk_analysis)
+            chunks_analysis.append(chunk_analysis)
 
 
     output_dict = {"chunks":chunks_analysis,
@@ -99,7 +107,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not os.path.isdir("sentence_models") or len(os.listdir("sentence_models")) == 0:
-        subprocess.call(["python", "download_sentence_model.py", "-sm", "all-mpnet-base-v2"])
+        subprocess.call(["python", "download_sm.py"])
 
     initializedFinaIndex = FinancialIndex(device=args.device, load=True)
 

@@ -5,8 +5,9 @@ from sentence_transformers import SentenceTransformer
 import pickle
 
 class FinancialDescriptor:
-    def __init__(self, description, embedding, sign):
+    def __init__(self, description, indicator, embedding, sign):
         self.description = description
+        self.indicator = indicator
         self.embedding = embedding
         self.sign = sign
         self.score = None
@@ -39,17 +40,17 @@ class FinancialIndex:
         for i, indicator in enumerate(indicators):
             if indicator not in inverse_relation_indicators:
                 for bull_phrase in phrases.bullish_phrases:
-                    bullish_descriptions.append(f"{indicator} {bull_phrase}")
+                    bullish_descriptions.append(f"{indicator}-{bull_phrase}")
 
                 for bear_phrase in phrases.bearish_phrases:
-                    bearish_descriptions.append(f"{indicator} {bear_phrase}")
+                    bearish_descriptions.append(f"{indicator}-{bear_phrase}")
 
             else:
                 for bull_phrase in phrases.bullish_phrases:
-                    bearish_descriptions.append(f"{indicator} {bull_phrase}")
+                    bearish_descriptions.append(f"{indicator}-{bull_phrase}")
 
                 for bear_phrase in phrases.bearish_phrases:
-                    bullish_descriptions.append(f"{indicator} {bear_phrase}")
+                    bullish_descriptions.append(f"{indicator}-{bear_phrase}")
 
         return bullish_descriptions, bearish_descriptions
 
@@ -60,17 +61,21 @@ class FinancialIndex:
         bullish_descriptions, bearish_descriptions = self.generateDescriptions()
 
         for description in bullish_descriptions:
+            indicator = description.split("-")[0]
+            description = description.replace("-", " ")
             description_embedding = self.encodeText(description)
 
             fblob = FinancialDescriptor(
-                description=description, embedding=description_embedding, sign="bull"
+                description=description, indicator = indicator, embedding=description_embedding, sign="bull"
             )
             bullish_descriptors.append(fblob)
 
         for description in bearish_descriptions:
+            indicator = description.split("-")[0]
+            description = description.replace("-", " ")
             description_embedding = self.encodeText(description)
             fblob = FinancialDescriptor(
-                description=description, embedding=description_embedding, sign="bear"
+                description=description,indicator = indicator, embedding=description_embedding, sign="bear"
             )
             bearish_descriptors.append(fblob)
         return bullish_descriptors, bearish_descriptors
