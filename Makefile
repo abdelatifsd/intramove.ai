@@ -1,4 +1,4 @@
 server:
 	python server.py -d cpu
-test:
-	python test_api.py
+call:
+	python api_call.py

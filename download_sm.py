@@ -20,4 +20,4 @@ if __name__ == "__main__":
     args = parser.parse_args()"""
     os.mkdir("sentence_models")
     #download_sentence_model("paraphrase-multilingual-MiniLM-L12-v2")
-    download_sentence_model("all-mpnet-base-v2")
+    download_sentence_model(os.getenv("SENTENCE_TRANSFORMER_MODEL"))

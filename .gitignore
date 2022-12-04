@@ -8,10 +8,10 @@ sentence_models
 sentence_models/
 .sentence_models
 *sentence_models
+certs
 
 # C extensions
 *.so
-
 # Distribution / packaging
 .Python
 build/

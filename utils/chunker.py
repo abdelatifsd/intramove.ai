@@ -1,5 +1,5 @@
 from typing import List
-import re, requests
+import re, requests, os
 
 def naive_chunker(text:str)->List[str]:
   chunked_text = re.split('[|!?.,:;()[\\]]', text)
@@ -10,7 +10,7 @@ def naive_chunker(text:str)->List[str]:
 
 def chunker_api(input_text:str)->List[str]:
   # Call chunker API
-  url = "https://api.repustate.com/v4/12856c614b13af33f55ffb8ac5b3838f724d21da57d024970481973f/chunk.json"
+  url = os.getenv("CHUNKER_API")
   lang = "en"
   params = {"text":input_text,"lang":lang}
   response = requests.post(url, params).json()["results"]

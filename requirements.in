@@ -3,3 +3,4 @@ faiss-cpu==1.6.5
 fast-api
 uvicorn
 pydantic
+python -m pip install "pymongo[srv]"
