@@ -9,8 +9,9 @@ bullish_phrases = [
     "expanded",
     "is in the green",
     "resumed uptrend",
-    "closing in positive territory"
-    "rebounds"
+    "closing in positive territory",
+    "rebounds",
+    "advance"
 ]
 bearish_phrases = [
     "halt",
