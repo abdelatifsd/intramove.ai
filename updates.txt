@@ -1,0 +1,13 @@
+### Update ideas ###
+
+* Process all news articles gather in a way that is easy to use to populate the dashboard {DONE}
+
+* Go through the dashboard and find false positives + phrases that should be fixed/included {DONE}
+
+* Amend phrases based on previous point {DONE}
+
+* Recreate the embeddings
+
+* Repopulate the dashboard
+
+* Analyze results
