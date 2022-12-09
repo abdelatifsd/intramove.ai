@@ -1,28 +1,31 @@
 bullish_phrases = [
     "improved",
-    "increased",
     "edged up",
     "extended gains",
     "booked gains",
     "risen over",
     "closed high",
     "climbed",
-    "gap shrank",
     "expanded",
-    "in the green",
-    "high level of",
+    "is in the green",
+    "resumed uptrend",
+    "closing in positive territory"
+    "rebounds"
 ]
 bearish_phrases = [
     "halt",
-    "worsen",
-    "decreased",
     "continues to fall",
     "edged lower",
     "closed lower",
     "gap widened",
     "growth slows",
+    "contracts",
+    "revised",
+    "shrank",
     "wavered",
     "retreated further",
-    "in the red",
-    "low level of",
+    "is in the red",
+    "resumed downtrend",
+    "closing in negative territory",
+    "leading the decline"
 ]

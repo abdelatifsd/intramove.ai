@@ -38,19 +38,22 @@ class FinancialIndex:
         indicators = list(set(indicators))
 
         for i, indicator in enumerate(indicators):
-            if indicator not in inverse_relation_indicators:
+            if indicator in inverse_relation_indicators:
+                indicator_specific_bullish_phrases =  ["decreased", "eased up"]
+                indicator_specific_bearish_phrases =  ["increased", "edged higher"]
+                for bull_phrase in indicator_specific_bullish_phrases:
+                    bullish_descriptions.append(f"{indicator}-{bull_phrase}")
+                for bear_phrase in indicator_specific_bearish_phrases:
+                    bearish_descriptions.append(f"{indicator}-{bear_phrase}")
+
+                if indicator == "interest rates" or indicator == "rate hikes":
+                    bearish_descriptions.append(f"{indicator}-expected to tighten further")
+            else:    
                 for bull_phrase in phrases.bullish_phrases:
                     bullish_descriptions.append(f"{indicator}-{bull_phrase}")
 
                 for bear_phrase in phrases.bearish_phrases:
                     bearish_descriptions.append(f"{indicator}-{bear_phrase}")
-
-            else:
-                for bull_phrase in phrases.bullish_phrases:
-                    bearish_descriptions.append(f"{indicator}-{bull_phrase}")
-
-                for bear_phrase in phrases.bearish_phrases:
-                    bullish_descriptions.append(f"{indicator}-{bear_phrase}")
 
         return bullish_descriptions, bearish_descriptions
 

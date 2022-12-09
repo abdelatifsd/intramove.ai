@@ -59,12 +59,17 @@ def analyzeHeadline(headline: str = Query(),
 
     selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
 
+    if selectedDescriptor.sign == "bull":
+        score = float(scores[0])
+    elif selectedDescriptor.sign == "bear":
+        score = float(scores[0])*-1
+
     output_dict = {"text":headline,
                     "datetime": datetime,
                     "sign":selectedDescriptor.sign,
                     "indicator":selectedDescriptor.indicator,
                     "description":selectedDescriptor.description,
-                    "score":str(scores[0])}
+                    "score":score}
     
   
     intramove_db["headline"].insert_one(output_dict,)
@@ -95,18 +100,20 @@ def analyzeArticle(article: str = Query(),
         scores, indices = initializedFinaIndex.index.search(document_embedding, 1)
         scores = scores.flatten()
         indices = indices.flatten()
-        if scores[0] > 0.4:
+        if scores[0] > 0.6:
             selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
             if selectedDescriptor.sign == "bull":
                 average_score+=scores[0]
+                score = float(scores[0])
             elif selectedDescriptor.sign == "bear":
                 average_score-=scores[0]
+                score = float(scores[0])*-1
 
             chunk_analysis = {"chunk":chunk,
                             "sign":selectedDescriptor.sign,
                             "indicator":selectedDescriptor.indicator,
                             "description":selectedDescriptor.description,
-                            "score":str(scores[0])}
+                            "score":score}
 
             chunks_analysis.append(chunk_analysis)
 
