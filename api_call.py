@@ -2,20 +2,6 @@ import requests
 import json
 from news_data import news_newformat
 
-def magic(batch_date,divider, news_batch):
-    split_data = news_batch.split(divider)
-    headlines = []
-    articles = []
-    date = []
-    for data in split_data:
-        if data != "":
-            headlines.append(data.split("\n")[1])
-            article = " ".join(data.split("\n")[2:]).replace("\n","")
-            articles.append(article)
-            date.append(batch_date)
-
-    return headlines, articles
-
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
