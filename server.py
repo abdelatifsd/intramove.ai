@@ -1,29 +1,32 @@
+# LOCAL MODULES
 from service import FinancialIndex
 from utils.stripe_funcs import hash_api_key, unhash_api_key, generate_api_key
-
+from models import StripeCustomer
+# NATIVE LIBS
 import datetime, requests, os, argparse, subprocess, logging, json
 from typing import BinaryIO, Union
 
+# ML & ENV
 from sentence_transformers import SentenceTransformer
 import pandas as pd
+from dotenv import load_dotenv
 
+# SERVER
 import uvicorn
 from fastapi import FastAPI, Query, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 
+# DATABASE
 from pymongo import MongoClient
-import bson
 
-from dotenv import load_dotenv
-
+# PAYMENT & AUTH
 import stripe
-stripe.api_key = "sk_test_51MHqP5B9KUi6tSIMD2D5ghlwIDt9Gb5goiwJVdFemCRWTCXwv8i05kWfIxRqwTwbK5hKYLxGCRJRf13z5m1ViHMA00T89FTJsL"
-#stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
-# stripe listen --forward-to=localhost:8000/webhook
 
 logging.getLogger().setLevel(logging.INFO)
 load_dotenv() 
 
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+# stripe listen --forward-to=localhost:8000/webhook
 api_client_map = {}
 
 "Change to a production DB"
@@ -46,13 +49,31 @@ intramove_db = initMongo()
 @app.post("/webhook")
 async def webhook(request: Request, event: dict): # add async
     # Check that the webhook is from Stripe
+
+    """signature = request.headers["Stripe-Signature"]
+    try:
+        event = stripe.Webhook.construct_event(
+            request.body, signature, stripe.api_key
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HTTPException(status_code=400, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HTTPException(status_code=400, detail="Invalid signature")"""
  
     eventType = event["type"]
     if eventType == "checkout.session.completed":
+        customer_id = event["data"]["object"]["customer"]
+        customer_email = event["data"]["object"]["customer_details"]["email"]
         customer_api_key = generate_api_key()
-        hashed_customer_api_key = hash_api_key(customer_api_key) # should map to customer
-        api_client_map[hashed_customer_api_key] = event["data"]["object"]["customer"]
         
+        hashed_customer_api_key = hash_api_key(customer_api_key) # should map to customer
+
+        customerObj = StripeCustomer(hash_api_key, 500, True,customer_id,customer_email)
+        api_client_map[hashed_customer_api_key] = customerObj
+        print(customer_api_key)
+        # Mechanism to email key to client
     elif eventType == "invoice.paid":
         print(f"Payment succeeded:")
     elif eventType == "invoice.payment_failed":
@@ -65,7 +86,7 @@ async def webhook(request: Request, event: dict): # add async
 
 @app.get("/customers")
 def customers():
-    #print(stripe.Customer.list())
+    print(stripe.Customer.list())
     print(api_client_map)
     #return JSONResponse({"text":"welcome to intramove.ai"})
 
@@ -100,17 +121,31 @@ def home():
     return JSONResponse({"text":"welcome to intramove.ai"})
 
 @app.post("/analyze/headline")
-def analyzeHeadline(api_key: str = Header(None),
+def analyzeHeadline(api_key: str = Header(),
                     headline: str = Query(), 
                     datetime: str = Query(),
                     callback_url: str = Query()):
     
     "Validate API key"
+    if not api_key:
+        return {"error":"API key is missing."}
+    
+    hashed_api_key = hash_api_key(api_key)
 
-    "Bill usage"
+    if hashed_api_key in api_client_map.keys():
+        customerObj = api_client_map[hashed_api_key]
+        if not customerObj.active:
+            return {"error":"recharge is required"}
+        if customerObj.calls == 0:
+            customerObj.active = False
+            api_client_map[hashed_api_key] = customerObj
+            return {"error":"recharge is required"}
+        customerObj.calls -=1 
+        api_client_map[hashed_api_key] = customerObj
+    else:
+        return {"error": "API key is invalid."}
 
     "Store client and other info in mongo DB"
-
     document_embedding = initializedFinaIndex.encodeText(
         headline
     )
@@ -134,18 +169,12 @@ def analyzeHeadline(api_key: str = Header(None),
     
     
     "Ensure you're using production DB"
-    intramove_db["headline"].insert_one(output_dict,)
+    #intramove_db["headline"].insert_one(output_dict,)
 
-    del output_dict["_id"]
+    #del output_dict["_id"]
 
-    if not callback_url:
-        return JSONResponse(output_dict)
-    else:
-        requests.post(
-            callback_url,
-            json=output_dict,
-        )
-
+    return JSONResponse(output_dict)
+    
 ### SETUP ###
 
 def start():
