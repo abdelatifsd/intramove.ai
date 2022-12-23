@@ -1,4 +1,19 @@
 ### Update ideas ###
 
-* Production branch to run publicly
+* Stripe branch [DONE]
+* Add API key email notification
+* Create new Mongo DB clusters and schemas (for headlines data and customer data)
+* Store all necessary variables in .env
+* Add webhook security layer
 * Storing clients news and articles and using those later on
+* Think about minimizing communication between DB and APP + the usage of caching for speedup
+* Perform different tests
+* Buy and figure out how to attach DNS
+* Host in live AWS instance
+* Perform live testing with friends (Drop price)
+* Think about using celery to queue tasks
+
+* Prepare documentation/blog for developers (CURL commands for language neutral instruction)
+* Prepare a video to share on Linkedin
+* Make updates on Linkedin
+* Share with public
