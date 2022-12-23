@@ -1,19 +1,19 @@
 import requests
 import json
 
+headline_payload = {
+    "headline": "The US stock market is down",
+    "datetime": "12/21/2022",
+    "callback_url": "dsdsds",
+}
 
-for i in range(20):
-    headline_payload = {
-        "headline": "The US stock market is down",
-        "datetime": "12/21/2022",
-        "callback_url": "dsdsds",
-    }
+headline_headers = {
+    "accept": "application/json",
+    "Content-Type": "application/json",
+    "api-key": "a62963b7ed9430029cec2375507735d34c8e3e266d7059551c33341f6474aeea",
+}
 
-    headline_headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json",
-        "api-key": "f490220303d1b2cd7ae89266926dd09a5d3cfc15b5e06ae9a831c3f33a90cf60",
-    }
+for i in range(15):
 
     response = requests.post(
         "http://0.0.0.0:8000/analyze/headline",

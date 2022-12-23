@@ -8,7 +8,7 @@ headers = {
 
 payload = {
     "product_id": "prod_N1vFZNiYNDhyM3",
-    "quantity": 1,
+    "quantity": 3,
 }
 response = requests.post(
     "http://0.0.0.0:8000/checkout", headers=headers, params=payload

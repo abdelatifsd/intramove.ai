@@ -1,12 +1,12 @@
 ### Update ideas ###
 
 * Stripe branch [DONE]
-* Update success/failure urls
+* Update success/failure urls [DONE]
+* Make credit/call system work [DONE]
 * Create new Mongo DB clusters and schemas (for headlines data and customer data)
 * Store all necessary variables in .env
 * Add webhook security layer
 * Storing clients news and articles and using those later on
-* Think about minimizing communication between DB and APP + the usage of caching for speedup
 * Perform different tests
 * Buy and figure out how to attach DNS
 * Host in live AWS instance
@@ -17,3 +17,6 @@
 * Prepare a video to share on Linkedin
 * Make updates on Linkedin
 * Share with public
+
+* Use Redis for caching
+* Think about minimizing communication between DB and APP + the usage of caching for speedup
