@@ -148,5 +148,13 @@ Commodity Supplies,
 Rate Hikes
 """
 
-indicators_cache = {"inflation":["Core Inflation Rate","Food Inflation", "Harmonised Inflation Rate MoM", "Harmonised Inflation Rate YoY", "Inflation Expectations" "Inflation Rate MoM",
-    "Producer Price Inflation MoM",]}
+indicators_cache = {
+    "inflation": [
+        "Core Inflation Rate",
+        "Food Inflation",
+        "Harmonised Inflation Rate MoM",
+        "Harmonised Inflation Rate YoY",
+        "Inflation Expectations" "Inflation Rate MoM",
+        "Producer Price Inflation MoM",
+    ]
+}

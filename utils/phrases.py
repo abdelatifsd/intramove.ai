@@ -11,7 +11,7 @@ bullish_phrases = [
     "resumed uptrend",
     "closing in positive territory",
     "rebounds",
-    "advance"
+    "advance",
 ]
 bearish_phrases = [
     "halt",
@@ -28,5 +28,5 @@ bearish_phrases = [
     "is in the red",
     "resumed downtrend",
     "closing in negative territory",
-    "leading the decline"
+    "leading the decline",
 ]

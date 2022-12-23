@@ -1,25 +1,25 @@
-def new_magic(date_data:str):
-  split_data = date_data.split("\n")
-  split_data = [data for data in split_data if data != ""]
+def new_magic(date_data: str):
+    split_data = date_data.split("\n")
+    split_data = [data for data in split_data if data != ""]
 
-  headlines = []
-  articles = []
-  dividers = []
-  for index in range(len(split_data)):
-    if (index+1) % 3 == 0:
-      split_data[index] = "divider"
+    headlines = []
+    articles = []
+    dividers = []
+    for index in range(len(split_data)):
+        if (index + 1) % 3 == 0:
+            split_data[index] = "divider"
 
-  split_data = [data for data in split_data if data != "divider"]
+    split_data = [data for data in split_data if data != "divider"]
 
-  headlines = []
-  articles = []
-  for index, headline in enumerate(split_data):
-    if index % 2 == 0:
-      headlines.append(split_data[index])
-    else:
-      articles.append(split_data[index])
+    headlines = []
+    articles = []
+    for index, headline in enumerate(split_data):
+        if index % 2 == 0:
+            headlines.append(split_data[index])
+        else:
+            articles.append(split_data[index])
 
-  return articles, headlines
+    return articles, headlines
 
 
 news_string = """
@@ -30,7 +30,7 @@ Brazilian Equities on Cautious NoteBrazil Stock Market
 Brazil’s benchmark Ibovespa was trading near the flatline around 107,300 after a positive start on Thursday, as investors turned more cautious ahead of the highly expected announcement of new ministers by President-elect Luiz Inacio Lula da Silva while also digesting the approval of the Transition PEC. Brazil's Congress late on Wednesday gave its final approval to a constitutional amendment increasing the government spending cap to maintain welfare payouts to poor families next year. The bill backed by Lula's transition team is set to raise Brazil's spending ceiling by BRL 145 billion for one year to fund monthly payments of 600 reais under the "Bolsa Familia" welfare program and to readjust the minimum wage above inflation. On the corporate front, IRB was the worst performer, with its shares falling almost 9%, followed by Dexco and Americanas, down over 2% each. By contrast, Sabesp and Banco Pan advanced the most, rising around 4% each.
 16 minutes ago
 """
-articles, headlines =  new_magic(news_string)
+articles, headlines = new_magic(news_string)
 
 
-news_cache = {"12/22/2022":{"headlines":headlines,"articles":articles}}
+news_cache = {"12/22/2022": {"headlines": headlines, "articles": articles}}

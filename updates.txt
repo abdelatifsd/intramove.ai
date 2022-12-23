@@ -1,7 +1,7 @@
 ### Update ideas ###
 
 * Stripe branch [DONE]
-* Add API key email notification
+* Update success/failure urls
 * Create new Mongo DB clusters and schemas (for headlines data and customer data)
 * Store all necessary variables in .env
 * Add webhook security layer
