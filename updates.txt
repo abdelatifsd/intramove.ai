@@ -5,14 +5,17 @@
 * Make credit/call system work [DONE]
 * Create new Mongo DB clusters and schemas (for headlines data and customer data) [DONE]
 * Store all necessary variables in .env [DONE]
-
 * Add webhook security layer [DONE]
-* Create python library that can be pip installed ot communicate with service
+* Create python library that can communicate with the service [DONE]
+
+* Add more functionality for the user  [DONE]
+* Enable callbacks [DONE]
+* Package the lib into pip
 * Perform different tests
 
 * Buy and figure out how to attach DNS
 * Host in live AWS instance (Dockerize?)
-* Perform live testing with friends (Drop price)
+* Perform live testing with friends (Drop price) (1$ - 100 calls)
 
 * Prepare documentation/blog for developers (CURL commands for language neutral instruction)
 * Make a blog or a simple demo site
@@ -21,6 +24,8 @@
 * Share with public as a Beta v1 release
 
 Optimization
+* Separate payment service from AI service (micro-services architecture)
+* Adding article analysis endpoint (figure chunker out)
 * Think about using celery to queue tasks
 * Use Redis for caching
 * Think about minimizing communication between DB and APP + the usage of caching for speedup
