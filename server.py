@@ -80,23 +80,25 @@ def create_checkout_session(product_id: str, quantity: int):
 
 @app.post("/webhook")
 async def webhook(request: Request, event: dict):  # add async
-    # Check that the webhook is from Stripe
-
-    """signature = request.headers["Stripe-Signature"]
+    # Verify the webhook signature
+   
     try:
-        event = stripe.Webhook.construct_event(
-            request.body, signature, stripe.api_key
+        payload = await request.body()
+        sig_header = request.headers["stripe-signature"]
+        stripe.Webhook.construct_event(
+        payload, sig_header, os.getenv("STRIPE_WEBHOOK_SECRET")
         )
     except ValueError as e:
         # Invalid payload
         return HTTPException(status_code=400, detail="Invalid payload")
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
-        return HTTPException(status_code=400, detail="Invalid signature")"""
+        return HTTPException(status_code=400, detail="Invalid signature")
+
 
     eventType = event["type"]
     if eventType == "checkout.session.completed":
-
+        #print("HERE!")
         stripe_customer_id = event["data"]["object"]["customer"]
         customer_email = event["data"]["object"]["customer_details"]["email"]
         customer_name = event["data"]["object"]["customer_details"]["name"]
