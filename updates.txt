@@ -14,7 +14,7 @@
 * Perform different local tests [DONE]
 
 * Buy and figure out how to attach DNS [DONE]
-* Dockerize application and run it on a live AWS instance
+* run application oni a live AWS instance [Done]
 * Update DNS in pypi package
 * Test calling it
 * Update env vars with production keys for all services

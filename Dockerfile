@@ -8,8 +8,12 @@ WORKDIR /app
 ADD . /app
 
 # Install any needed packages specified in requirements.txt #--no-cache-dir
-RUN pip install -r requirements.txt 
 
-EXPOSE 9999
+RUN pip install faiss-cpu sentence-transformers fastapi uvicorn pydantic black stripe python-dotenv numpy bson
+RUN python -m pip install "pymongo[srv]"
+
+RUN mkdir data
+
+EXPOSE 8000
 
 #CMD ["python", "server.py","-m","development"]
