@@ -1,0 +1,28 @@
+#FROM nvidia/cuda:11.6.0-base-ubuntu20.04
+FROM nvidia/cuda:11.6.0-cudnn8-devel-ubuntu20.04
+
+ENV PYTHON_VERSION=3.9
+
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -qq update \
+    && apt-get -qq install --no-install-recommends \
+    && apt-get install -y git \
+    python${PYTHON_VERSION} \
+    python${PYTHON_VERSION}-venv \
+    python3-pip \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s -f /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
+    ln -s -f /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
+    ln -s -f /usr/bin/pip3 /usr/bin/pip
+
+RUN apt-get update && apt-get install nano 
+
+WORKDIR /app
+
+COPY . /app
+#RUN pip install --no-cache -r requirements.txt
+RUN pip install onnxruntime-gpu==1.13.1
+RUN pip install faiss-gpu
+RUN pip install grpcio keras_preprocessing numpy onnx transformers boto3 grpcio-tools bpemb keybert sentence_transformers

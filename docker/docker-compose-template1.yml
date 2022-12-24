@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  pyml:
+    image: repustatedocker/pymlclassifier:gpu
+    command: bash -c "python update_models.py -m production  && 
+                      python download_sm.py &&
+                      python server.py -m production -d gpu"
+    volumes:
+      - ./app:/usr/src/app
+      - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
+    ports:
+      - "9999:9999"
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+  go:
+    image: repustatedocker/api:latest
+    command: >
+      /bin/bash -c "
+      cd app;  
+      ./repustate -langs=en;"
+    environment:
+      GRPC_HOST: pyml
+    ports:
+      - "9000:9000"
+    depends_on:
+      - pyml
+volumes:
+  pyml:
+  go:
