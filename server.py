@@ -133,7 +133,7 @@ async def webhook(request: Request, event: dict):  # add async
             # Update the customer
             result = intramove_db["customers"].update_one(query, update)
             if result.acknowledged:
-                print("Customer was updated successfully")
+                logging.info("Customer was updated successfully")
         else:
             customer_api_key = generate_api_key()
             customerObj = StripeCustomer(
@@ -152,13 +152,13 @@ async def webhook(request: Request, event: dict):  # add async
 
             result = intramove_db["customers"].insert_one(customerObj.generate_dict())
             if result.acknowledged:
-                print("Customer was inserted successfully")
+                logging.info("Customer was inserted successfully")
 
         # Mechanism to email key to client
     elif eventType == "invoice.paid":
-        print(f"Payment succeeded:")
+        logging.info(f"Payment succeeded:")
     elif eventType == "invoice.payment_failed":
-        print(f"Payment failed:")
+        logging.info(f"Payment failed:")
     else:
         # Unhandled event type
         return HTTPException(status_code=400, detail="Unhandled event type")
@@ -300,7 +300,7 @@ def analyzeHeadline(
         # Update the customer
         result = intramove_db["customers"].update_one(query, update)
         if result.acknowledged:
-            print("Customer set to inactive.")
+            logging.info("Customer set to inactive.")
         return {"error": "recharge is required"}
 
     return JSONResponse(output_dict)
