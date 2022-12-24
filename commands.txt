@@ -1,9 +1,13 @@
 docker buildx build --platform=linux/amd64 -t abdellatifsd/intramove:v1 .
 docker push abdellatifsd/intramove:v1
 
-ssh -i "/Users/abdellatif/.ssh/intramove_ec2.pem" ec2-user@35.183.235.49
+ssh -i "/Users/abdellatif/.ssh/intramove.pem" ubuntu@3.96.169.183
 
 
 sudo yum install docker
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
+
+ssh-keygen -t rsa -b 4096 -C "abdulatifsal@gmail.com"
+
+git clone git@github.com:abdelatifsd/intramove.ai.git --branch stripe
