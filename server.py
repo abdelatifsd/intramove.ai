@@ -47,7 +47,6 @@ intramove_db = initMongo()
 
 ### Stripe end points ###
 
-
 @app.post("/checkout")
 def create_checkout_session(product_id: str, quantity: int):
     try:
@@ -78,10 +77,9 @@ def create_checkout_session(product_id: str, quantity: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/webhook")
+@app.post("/webhook",include_in_schema=False)
 async def webhook(request: Request, event: dict):  # add async
     # Verify the webhook signature
-   
     try:
         payload = await request.body()
         sig_header = request.headers["stripe-signature"]
@@ -98,7 +96,7 @@ async def webhook(request: Request, event: dict):  # add async
 
     eventType = event["type"]
     if eventType == "checkout.session.completed":
-        #print("HERE!")
+        
         stripe_customer_id = event["data"]["object"]["customer"]
         customer_email = event["data"]["object"]["customer_details"]["email"]
         customer_name = event["data"]["object"]["customer_details"]["name"]
@@ -125,12 +123,10 @@ async def webhook(request: Request, event: dict):  # add async
             # Define the update
             update = {
                 "$set": {
-                    "credits": customer["credits"] + number_of_api_credits,
+                    "credits_available": customer["credits_available"] + number_of_api_credits,
                     "active": True,
                     "number_of_payments": customer["number_of_payments"] + 1,
                     "total_spend": customer["total_spend"] + customer_total_spend,
-                    "credits_consumed": customer["credits_consumed"]
-                    + number_of_api_credits,
                 }
             }
 
@@ -142,7 +138,7 @@ async def webhook(request: Request, event: dict):  # add async
             customer_api_key = generate_api_key()
             customerObj = StripeCustomer(
                 api_key=customer_api_key,
-                credits=number_of_api_credits,
+                credits_available=number_of_api_credits,
                 number_of_payments=1,
                 active=True,
                 stripe_customer_id=stripe_customer_id,
@@ -151,7 +147,7 @@ async def webhook(request: Request, event: dict):  # add async
                 postal_code=customer_postal_code,
                 country=customer_country,
                 total_spend=int(customer_total_spend) * int(quantity),
-                credits_consumed=int(number_of_api_credits),
+                credits_consumed=0,
             )
 
             result = intramove_db["customers"].insert_one(customerObj.generate_dict())
@@ -169,21 +165,29 @@ async def webhook(request: Request, event: dict):  # add async
 
     return {"status": "success"}
 
+@app.get("/client_key")
+def client_key(email: str, name: str):
+    query = {"email": email,"name":name}
+    customer = intramove_db["customers"].find_one(query)
+    return customer["api_key"]
 
-@app.get("/customers")
-def customers():
-    print(stripe.Customer.list())
-    print(api_client_map)
-    # return JSONResponse({"text":"welcome to intramove.ai"})
+@app.get("/credits_available")
+def credits_available(api_key: str):
+    query = {"api_key": api_key}
+    customer = intramove_db["customers"].find_one(query)
+    return customer["credits_available"]
 
+@app.get("/credits_consumed")
+def credits_consumed(api_key: str):
+    query = {"api_key": api_key}
+    customer = intramove_db["customers"].find_one(query)
+    return customer["credits_consumed"]
 
-@app.get("/clientkey")
-def clientkey(email: str, name: str):
-    for customerObj in client_cache:
-        if email == customerObj.customer_email and name == customerObj.customer_name:
-            return {"api_key": customerObj.api_key}
-    return {"error": "No API key found."}
-
+@app.get("/status")
+def status(api_key: str):
+    query = {"api_key": api_key}
+    customer = intramove_db["customers"].find_one(query)
+    return "Active" if customer["activate"] else "Inactive"
 
 @app.get("/success")
 def success():
@@ -255,15 +259,8 @@ def analyzeHeadline(
     if not customer["active"]:
         return {"error": "recharge is required."}
 
-    if customer["credits"] == 0:
-        update = {"$set": {"active": False}}
-        # Update the customer
-        result = intramove_db["customers"].update_one(query, update)
-        if result.acknowledged:
-            print("Customer set to inactive.")
-        return {"error": "recharge is required"}
-
-    update = {"$inc": {"credits": -1}}
+    update = {"$inc": {"credits_available": -1,
+                      "credits_consumed":1}}
     # Update the customer
     intramove_db["customers"].update_one(query, update)
 
@@ -297,6 +294,14 @@ def analyzeHeadline(
 
     del output_dict["_id"]
     del output_dict["api_key"]
+
+    if customer["credits_available"] == 0:
+        update = {"$set": {"active": False}}
+        # Update the customer
+        result = intramove_db["customers"].update_one(query, update)
+        if result.acknowledged:
+            print("Customer set to inactive.")
+        return {"error": "recharge is required"}
 
     return JSONResponse(output_dict)
 

@@ -2,7 +2,7 @@ class StripeCustomer:
     def __init__(
         self,
         api_key,
-        credits,  # active credits
+        credits_available,  # active credits
         number_of_payments,
         active,
         stripe_customer_id,
@@ -14,7 +14,7 @@ class StripeCustomer:
         credits_consumed,
     ):
         self.api_key = api_key
-        self.credits: int = credits
+        self.credits_available: int = credits_available
         self.number_of_payments: int = number_of_payments
         self.active = active
         self.stripe_customer_id = stripe_customer_id
@@ -28,7 +28,7 @@ class StripeCustomer:
     def generate_dict(self):
         return {
             "api_key": self.api_key,
-            "credits": self.credits,
+            "credits_available": self.credits_available,
             "number_of_payments": self.number_of_payments,
             "active": self.active,
             "stripe_customer_id": self.stripe_customer_id,

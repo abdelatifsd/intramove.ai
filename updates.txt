@@ -6,12 +6,11 @@
 * Create new Mongo DB clusters and schemas (for headlines data and customer data) [DONE]
 * Store all necessary variables in .env [DONE]
 
-* Add webhook security layer
-* Perform different tests
-* Buy and figure out how to attach DNS
-
+* Add webhook security layer [DONE]
 * Create python library that can be pip installed ot communicate with service
+* Perform different tests
 
+* Buy and figure out how to attach DNS
 * Host in live AWS instance (Dockerize?)
 * Perform live testing with friends (Drop price)
 

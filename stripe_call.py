@@ -10,10 +10,10 @@ headline_payload = {
 headline_headers = {
     "accept": "application/json",
     "Content-Type": "application/json",
-    "api-key": "a62963b7ed9430029cec2375507735d34c8e3e266d7059551c33341f6474aeea",
+    "api-key": "9ae446fdcfa4224b5ab9ac0554a381074a4406836228119ac3deb2ce42c5d793",
 }
 
-for i in range(15):
+for i in range(1):
 
     response = requests.post(
         "http://0.0.0.0:8000/analyze/headline",
