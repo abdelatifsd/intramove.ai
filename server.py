@@ -64,8 +64,8 @@ def create_checkout_session(product_id: str, quantity: int):
                     "quantity": quantity,
                 }
             ],
-            success_url="http://localhost:8000/success",
-            cancel_url="http://localhost:8000/failure",
+            success_url="http://intramove.com:8000/success",
+            cancel_url="http://intramove.com:8000/failure",
             mode="payment",
             customer_creation="always",
             metadata={
