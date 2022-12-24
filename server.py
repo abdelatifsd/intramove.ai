@@ -30,9 +30,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 # stripe listen --forward-to=localhost:8000/webhook
 api_client_map = {}
 client_cache = []
-package_creditscount_map = {"prod_N1vFZNiYNDhyM3": 5}
-"Change to a production DB"
-
+package_credits_count_map = {"prod_N2md5pnwvPycA0": 100}
 
 def initMongo():
     uri = os.getenv("MONGO_DB_URI")
@@ -53,9 +51,10 @@ intramove_db = initMongo()
 def create_checkout_session(product_id: str, quantity: int):
     try:
         # Create the checkout session
+        
         productObject = stripe.Product.retrieve(product_id)
         price_id = productObject.default_price
-
+        
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
@@ -64,6 +63,11 @@ def create_checkout_session(product_id: str, quantity: int):
                     "quantity": quantity,
                 }
             ],
+            enabled_events=[
+                "checkout.session.completed",
+                "invoice.payment_failed",
+                "invoice.paid",
+            ],
             success_url="http://intramove.com:8000/success",
             cancel_url="http://intramove.com:8000/failure",
             mode="payment",
@@ -71,7 +75,7 @@ def create_checkout_session(product_id: str, quantity: int):
             metadata={
                 "product_id": product_id,
                 "quantity": quantity,
-                "number_of_api_credits": package_creditscount_map[product_id],
+                "number_of_api_credits": package_credits_count_map[product_id],
             },
         )
         return JSONResponse({"session_id": session})
@@ -173,7 +177,7 @@ def client_api_key(client_id: str):
     query = {"_id": ObjectId(client_id)}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"api_key":customer["api_key"]})
+        return JSONResponse({"api_key": customer["api_key"]})
     return None
 
 
@@ -182,7 +186,7 @@ def client_id(email: str, name: str):
     query = {"email": email, "name": name}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"client_id":str(customer["_id"])}) 
+        return JSONResponse({"client_id": str(customer["_id"])})
     return None
 
 
@@ -191,7 +195,7 @@ def credits_available(api_key: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"credits_available":customer["credits_available"]})
+        return JSONResponse({"credits_available": customer["credits_available"]})
     return None
 
 
@@ -200,7 +204,7 @@ def credits_consumed(api_key: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"credits_consumed":customer["credits_consumed"]}) 
+        return JSONResponse({"credits_consumed": customer["credits_consumed"]})
     return None
 
 
@@ -277,7 +281,8 @@ def analyzeHeadline(
     # Find the customer
     customer = intramove_db["customers"].find_one(query)
 
-    if not customer: return JSONResponse({"error": "API key entered is invalid."})
+    if not customer:
+        return JSONResponse({"error": "API key entered is invalid."})
 
     if customer["credits_available"] == 0:
         update = {"$set": {"active": False}}
@@ -339,7 +344,9 @@ def analyzeHeadline(
             json=output_dict,
         )
 
+
 ### SETUP ###
+
 
 def start():
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
