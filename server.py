@@ -173,7 +173,7 @@ def client_api_key(client_id: str):
     query = {"_id": ObjectId(client_id)}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return customer["api_key"]
+        return JSONResponse({"api_key":customer["api_key"]})
     return None
 
 
@@ -182,7 +182,7 @@ def client_id(email: str, name: str):
     query = {"email": email, "name": name}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return str(customer["_id"])
+        return JSONResponse({"client_id":str(customer["_id"])}) 
     return None
 
 
@@ -191,7 +191,7 @@ def credits_available(api_key: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return customer["credits_available"]
+        return JSONResponse({"credits_available":customer["credits_available"]})
     return None
 
 
@@ -200,7 +200,7 @@ def credits_consumed(api_key: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return customer["credits_consumed"]
+        return JSONResponse({"credits_consumed":customer["credits_consumed"]}) 
     return None
 
 
@@ -209,7 +209,7 @@ def status(api_key: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return "Active" if customer["activate"] else "Inactive"
+        return JSONResponse({"status": "Active" if customer["active"] else "Inactive"})
     return None
 
 
