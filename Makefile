@@ -1,5 +1,5 @@
 server:
-	python server.py -d cpu
+	sudo python server.py -d cpu
 
 init:
 	python stripe_init.py

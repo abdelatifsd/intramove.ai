@@ -11,9 +11,3 @@ ADD . /app
 
 RUN pip install faiss-cpu sentence-transformers fastapi uvicorn pydantic black stripe python-dotenv numpy bson
 RUN python -m pip install "pymongo[srv]"
-
-RUN mkdir data
-
-EXPOSE 8000
-
-#CMD ["python", "server.py","-m","development"]

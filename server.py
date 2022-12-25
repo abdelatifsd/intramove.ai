@@ -27,10 +27,10 @@ logging.getLogger().setLevel(logging.INFO)
 load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-# stripe listen --forward-to=localhost:8000/webhook
-api_client_map = {}
-client_cache = []
-package_credits_count_map = {"prod_N2md5pnwvPycA0": 100}
+# stripe listen --forward-to=localhost:443/webhook
+# stripe listen --forward-to=https://intramove.com:443/webhook
+
+package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100}
 
 def initMongo():
     uri = os.getenv("MONGO_DB_URI")
@@ -63,13 +63,8 @@ def create_checkout_session(product_id: str, quantity: int):
                     "quantity": quantity,
                 }
             ],
-            enabled_events=[
-                "checkout.session.completed",
-                "invoice.payment_failed",
-                "invoice.paid",
-            ],
-            success_url="http://intramove.com:8000/success",
-            cancel_url="http://intramove.com:8000/failure",
+            success_url="https://intramove.com:443/success",
+            cancel_url="https://intramove.com:443/failure",
             mode="payment",
             customer_creation="always",
             metadata={
@@ -101,7 +96,7 @@ async def webhook(request: Request, event: dict):  # add async
 
     eventType = event["type"]
     if eventType == "checkout.session.completed":
-
+        
         stripe_customer_id = event["data"]["object"]["customer"]
         customer_email = event["data"]["object"]["customer_details"]["email"]
         customer_name = event["data"]["object"]["customer_details"]["name"]
@@ -349,7 +344,21 @@ def analyzeHeadline(
 
 
 def start():
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=443, log_level="info",ssl_keyfile=os.getenv("SSL_KEYFILE_PATH"),ssl_certfile=os.getenv("SSL_CERTIFICATE_PATH"))
+    """import subprocess
+
+    # Set the path to the Uvicorn executable
+    uvicorn_path = os.getenv("UVICORN_PATH") 
+
+    # Set the path to the SSL/TLS certificate and private key files
+    ssl_keyfile = os.getenv("SSL_KEYFILE_PATH")
+    ssl_certfile = os.getenv("SSL_CERTIFICATE_PATH")
+
+    # Set the command to run Uvicorn using authbind
+    command = ['sudo', uvicorn_path, 'server:app', '--host', '0.0.0.0', '--port', '443', '--log-level', 'info', '--ssl-keyfile', ssl_keyfile, '--ssl-certfile', ssl_certfile]
+
+    # Run the command
+    subprocess.run(command)"""
 
 
 if __name__ == "__main__":

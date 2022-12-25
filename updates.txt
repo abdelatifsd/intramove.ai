@@ -15,11 +15,14 @@
 
 * Buy and figure out how to attach DNS [DONE]
 * run application oni a live AWS instance [Done]
-* Update DNS in pypi package
-* Test calling it
-* Update env vars with production keys for all services
-* Create pricing/packaging plan
-* Perform live testing with friends (Drop price) (1$ - 250 calls)
+* Update DNS in pypi package [DONE]
+* Test calling it [DONE]
+* Update env vars with production keys for all services [DOONE]
+* Create pricing/packaging plan [DONE]
+* Perform live testing with friends (Drop price) (0.5$ - 100 calls) [DONE]
+* Figure out live bug 
+* Check aws bill
+* Finalize live testing with friends
 
 * Prepare documentation/blog for developers (CURL commands for language neutral instruction)
 * Make a blog or a simple demo site
