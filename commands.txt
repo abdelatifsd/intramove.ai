@@ -31,3 +31,11 @@ https://stripe.com/docs/stripe-cli
 MongoDB 
 add .pem mongodb file to ssh folder
 
+
+TLS
+sudo apt-get install certbot
+sudo certbot certonly --standalone -d intramove.com
+sudo certbot certonly --debug --standalone -d intramove.com
+
+sudo apt-get install authbind
+

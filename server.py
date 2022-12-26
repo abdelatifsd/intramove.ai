@@ -67,6 +67,9 @@ def create_checkout_session(product_id: str, quantity: int):
             cancel_url="https://intramove.com:443/failure",
             mode="payment",
             customer_creation="always",
+            automatic_tax={
+                'enabled': True,
+            },
             metadata={
                 "product_id": product_id,
                 "quantity": quantity,
