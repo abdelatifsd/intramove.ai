@@ -2,6 +2,7 @@
 from service import FinancialIndex
 from utils.stripe_funcs import generate_api_key
 from models import StripeCustomer
+from utils.chunker import advanced_chunker
 
 # NATIVE LIBS
 import os, argparse, subprocess, logging, requests
@@ -30,7 +31,8 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 # stripe listen --forward-to=localhost:443/webhook
 # stripe listen --forward-to=https://intramove.com:443/webhook
 
-package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100}
+package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100,
+                            "":25}
 
 def initMongo():
     uri = os.getenv("MONGO_DB_URI")
@@ -342,6 +344,93 @@ def analyzeHeadline(
             json=output_dict,
         )
 
+@app.post("/analyze/article")
+def analyzeArticle( api_key: str = Header(),
+                    article: str = Query(), 
+                    datetime: str = Query(),
+                    callback_url: str = Query()):
+    
+    "Validate API key"
+    if not api_key:
+        return {"error": "API key is empty."}
+
+    query = {"api_key": api_key}
+
+    # Find the customer
+    customer = intramove_db["customers"].find_one(query)
+
+    if not customer:
+        return JSONResponse({"error": "API key entered is invalid."})
+
+    if customer["credits_available"] == 0:
+        update = {"$set": {"active": False}}
+        # Update the customer
+        result = intramove_db["customers"].update_one(query, update)
+        if result.acknowledged:
+            logging.info("Customer set to inactive.")
+        return JSONResponse({"error": "recharge is required"})
+
+    customer_db_id = customer["_id"]
+
+    if not customer:
+        return JSONResponse({"error": "API key is missing or is not valid."})
+
+    if not customer["active"]:
+        return JSONResponse({"error": "recharge is required."})
+
+    update = {"$inc": {"credits_available": -1, "credits_consumed": 1}}
+    # Update the customer
+    intramove_db["customers"].update_one(query, update)
+
+    chunked_text = advanced_chunker(article)
+    chunks_analysis = [] # text:results
+    average_score  = 0
+
+    for chunk in chunked_text:
+        document_embedding = initializedFinaIndex.encodeText(
+            chunk
+        )
+        scores, indices = initializedFinaIndex.index.search(document_embedding, 1)
+        scores = scores.flatten()
+        indices = indices.flatten()
+        if scores[0] > 0.6:
+            selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
+            if selectedDescriptor.sign == "bull":
+                average_score+=scores[0]
+                score = float(scores[0])
+            elif selectedDescriptor.sign == "bear":
+                average_score-=scores[0]
+                score = float(scores[0])*-1
+
+            chunk_analysis = {"chunk":chunk,
+                            "sign":selectedDescriptor.sign,
+                            "indicator":selectedDescriptor.indicator,
+                            "description":selectedDescriptor.description,
+                            "score":score}
+
+            chunks_analysis.append(chunk_analysis)
+
+    output_dict = {"chunks":chunks_analysis,
+                "average_score":average_score,
+                "average_sign":"bull" if average_score > 0 else "bear",
+                "datetime":datetime,
+                "api_key": api_key,
+                "customer_id": customer_db_id
+                }
+
+    intramove_db["article"].insert_one(output_dict,)
+
+    del output_dict["_id"]
+    del output_dict["api_key"]
+    del output_dict["customer_id"]
+
+    if not callback_url:
+        return JSONResponse(output_dict)
+    else:
+        requests.post(
+            callback_url,
+            json=output_dict,
+        )
 
 ### SETUP ###
 

@@ -10,7 +10,8 @@ sentence_models/
 *sentence_models
 certs
 *.env
-.env2
+.envlive
+.envlocal
 
 # C extensions
 *.so
