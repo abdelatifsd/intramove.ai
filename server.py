@@ -10,6 +10,7 @@ from bson import ObjectId
 
 # ML & ENV
 from dotenv import load_dotenv
+import faiss
 
 # SERVER
 import uvicorn
@@ -31,8 +32,13 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 # stripe listen --forward-to=localhost:443/webhook
 # stripe listen --forward-to=https://intramove.com:443/webhook
 
-package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100,
-                            "":25}
+package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100, "prod_N3UFpCDcp0Hisv": 100}
+
+product_id_to_name_map = {
+    "prod_N2ndwwdkNjVThi": "headlines-100",
+    "prod_N3UFpCDcp0Hisv": "articles-100",
+}
+
 
 def initMongo():
     uri = os.getenv("MONGO_DB_URI")
@@ -53,10 +59,10 @@ intramove_db = initMongo()
 def create_checkout_session(product_id: str, quantity: int):
     try:
         # Create the checkout session
-        
+
         productObject = stripe.Product.retrieve(product_id)
         price_id = productObject.default_price
-        
+
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             line_items=[
@@ -70,7 +76,7 @@ def create_checkout_session(product_id: str, quantity: int):
             mode="payment",
             customer_creation="always",
             automatic_tax={
-                'enabled': True,
+                "enabled": True,
             },
             metadata={
                 "product_id": product_id,
@@ -101,7 +107,7 @@ async def webhook(request: Request, event: dict):  # add async
 
     eventType = event["type"]
     if eventType == "checkout.session.completed":
-        
+
         stripe_customer_id = event["data"]["object"]["customer"]
         customer_email = event["data"]["object"]["customer_details"]["email"]
         customer_name = event["data"]["object"]["customer_details"]["name"]
@@ -116,6 +122,8 @@ async def webhook(request: Request, event: dict):  # add async
         event_metadata = event["data"]["object"]["metadata"]
         quantity = event_metadata["quantity"]
         number_of_api_credits = event_metadata["number_of_api_credits"]
+        product_id = event_metadata["product_id"]
+        product_name = product_id_to_name_map[product_id]
 
         number_of_api_credits = int(number_of_api_credits) * int(quantity)
         assert type(number_of_api_credits) == int, "Variable must be an integer."
@@ -126,15 +134,30 @@ async def webhook(request: Request, event: dict):  # add async
         customer = intramove_db["customers"].find_one(query)
         if customer:
             # Define the update
-            update = {
-                "$set": {
-                    "credits_available": customer["credits_available"]
-                    + number_of_api_credits,
-                    "active": True,
-                    "number_of_payments": customer["number_of_payments"] + 1,
-                    "total_spend": customer["total_spend"] + customer_total_spend,
+            if product_name == "headlines-100":
+                update = {
+                    "$set": {
+                        "headline_credits_available": customer[
+                            "headline_credits_available"
+                        ]
+                        + number_of_api_credits,
+                        "headline_active": True,
+                        "number_of_payments": customer["number_of_payments"] + 1,
+                        "total_spend": customer["total_spend"] + customer_total_spend,
+                    }
                 }
-            }
+            elif product_name == "articles-100":
+                update = {
+                    "$set": {
+                        "article_credits_available": customer[
+                            "article_credits_available"
+                        ]
+                        + number_of_api_credits,
+                        "article_active": True,
+                        "number_of_payments": customer["number_of_payments"] + 1,
+                        "total_spend": customer["total_spend"] + customer_total_spend,
+                    }
+                }
 
             # Update the customer
             result = intramove_db["customers"].update_one(query, update)
@@ -142,19 +165,41 @@ async def webhook(request: Request, event: dict):  # add async
                 logging.info("Customer was updated successfully")
         else:
             customer_api_key = generate_api_key()
-            customerObj = StripeCustomer(
-                api_key=customer_api_key,
-                credits_available=number_of_api_credits,
-                number_of_payments=1,
-                active=True,
-                stripe_customer_id=stripe_customer_id,
-                email=customer_email,
-                name=customer_name,
-                postal_code=customer_postal_code,
-                country=customer_country,
-                total_spend=int(customer_total_spend) * int(quantity),
-                credits_consumed=0,
-            )
+
+            if product_name == "headlines-100":
+                customerObj = StripeCustomer(
+                    api_key=customer_api_key,
+                    headline_credits_available=number_of_api_credits,
+                    article_credits_available=0,
+                    number_of_payments=1,
+                    headline_active=True,
+                    article_active=False,
+                    stripe_customer_id=stripe_customer_id,
+                    email=customer_email,
+                    name=customer_name,
+                    postal_code=customer_postal_code,
+                    country=customer_country,
+                    total_spend=int(customer_total_spend) * int(quantity),
+                    headline_credits_consumed=0,
+                    article_credits_consumed=0,
+                )
+            elif product_name == "articles-100":
+                customerObj = StripeCustomer(
+                    api_key=customer_api_key,
+                    headline_credits_available=0,
+                    article_credits_available=number_of_api_credits,
+                    number_of_payments=1,
+                    headline_active=False,
+                    article_active=True,
+                    stripe_customer_id=stripe_customer_id,
+                    email=customer_email,
+                    name=customer_name,
+                    postal_code=customer_postal_code,
+                    country=customer_country,
+                    total_spend=int(customer_total_spend) * int(quantity),
+                    headline_credits_consumed=0,
+                    article_credits_consumed=0,
+                )
 
             result = intramove_db["customers"].insert_one(customerObj.generate_dict())
             if result.acknowledged:
@@ -191,29 +236,50 @@ def client_id(email: str, name: str):
 
 
 @app.get("/credits_available")
-def credits_available(api_key: str):
+def credits_available(api_key: str, product_name: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"credits_available": customer["credits_available"]})
+        if product_name == "headlines-100":
+            return JSONResponse(
+                {"headline_credits_available": customer["headline_credits_available"]}
+            )
+        elif product_name == "articles-100":
+            return JSONResponse(
+                {"article_credits_available": customer["article_credits_available"]}
+            )
     return None
 
 
 @app.get("/credits_consumed")
-def credits_consumed(api_key: str):
+def credits_consumed(api_key: str, product_name: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"credits_consumed": customer["credits_consumed"]})
+        if product_name == "headlines-100":
+            return JSONResponse(
+                {"headline_credits_consumed": customer["headline_credits_consumed"]}
+            )
+        elif product_name == "articles-100":
+            return JSONResponse(
+                {"article_credits_consumed": customer["article_credits_consumed"]}
+            )
     return None
 
 
 @app.get("/status")
-def status(api_key: str):
+def status(api_key: str, product_name: str):
     query = {"api_key": api_key}
     customer = intramove_db["customers"].find_one(query)
     if customer:
-        return JSONResponse({"status": "Active" if customer["active"] else "Inactive"})
+        if product_name == "headlines-100":
+            return JSONResponse(
+                {"status": "Active" if customer["headline_active"] else "Inactive"}
+            )
+        elif product_name == "articles-100":
+            return JSONResponse(
+                {"status": "Active" if customer["article_active"] else "Inactive"}
+            )
     return None
 
 
@@ -284,12 +350,12 @@ def analyzeHeadline(
     if not customer:
         return JSONResponse({"error": "API key entered is invalid."})
 
-    if customer["credits_available"] == 0:
-        update = {"$set": {"active": False}}
+    if customer["headline_credits_available"] == 0:
+        update = {"$set": {"headline_active": False}}
         # Update the customer
         result = intramove_db["customers"].update_one(query, update)
         if result.acknowledged:
-            logging.info("Customer set to inactive.")
+            logging.info("Customer set to headline-inactive.")
         return JSONResponse({"error": "recharge is required"})
 
     customer_db_id = customer["_id"]
@@ -297,10 +363,12 @@ def analyzeHeadline(
     if not customer:
         return JSONResponse({"error": "API key is missing or is not valid."})
 
-    if not customer["active"]:
-        return JSONResponse({"error": "recharge is required."})
+    if not customer["headline_active"]:
+        return JSONResponse({"error": "headline recharge is required."})
 
-    update = {"$inc": {"credits_available": -1, "credits_consumed": 1}}
+    update = {
+        "$inc": {"headline_credits_available": -1, "headline_credits_consumed": 1}
+    }
     # Update the customer
     intramove_db["customers"].update_one(query, update)
 
@@ -344,12 +412,15 @@ def analyzeHeadline(
             json=output_dict,
         )
 
+
 @app.post("/analyze/article")
-def analyzeArticle( api_key: str = Header(),
-                    article: str = Query(), 
-                    datetime: str = Query(),
-                    callback_url: str = Query()):
-    
+def analyzeArticle(
+    api_key: str = Header(),
+    article: str = Query(),
+    date: str = Query(),
+    callback_url: str = Query(),
+):
+
     "Validate API key"
     if not api_key:
         return {"error": "API key is empty."}
@@ -362,63 +433,73 @@ def analyzeArticle( api_key: str = Header(),
     if not customer:
         return JSONResponse({"error": "API key entered is invalid."})
 
-    if customer["credits_available"] == 0:
-        update = {"$set": {"active": False}}
+    if customer["article_credits_available"] == 0:
+        update = {"$set": {"article_active": False}}
         # Update the customer
         result = intramove_db["customers"].update_one(query, update)
         if result.acknowledged:
-            logging.info("Customer set to inactive.")
-        return JSONResponse({"error": "recharge is required"})
+            logging.info("Customer set to article_inactive.")
+        return JSONResponse({"error": "Article recharge is required"})
 
     customer_db_id = customer["_id"]
 
     if not customer:
         return JSONResponse({"error": "API key is missing or is not valid."})
 
-    if not customer["active"]:
-        return JSONResponse({"error": "recharge is required."})
+    if not customer["article_active"]:
+        return JSONResponse({"error": "Article recharge is required."})
 
-    update = {"$inc": {"credits_available": -1, "credits_consumed": 1}}
+    update = {"$inc": {"article_credits_available": -1, "article_credits_consumed": 1}}
     # Update the customer
     intramove_db["customers"].update_one(query, update)
 
-    chunked_text = advanced_chunker(article)
-    chunks_analysis = [] # text:results
-    average_score  = 0
+    chunks = advanced_chunker(article)
+    chunks_analysis = []  # text:results
+    average_score = 0
 
-    for chunk in chunked_text:
-        document_embedding = initializedFinaIndex.encodeText(
-            chunk
-        )
-        scores, indices = initializedFinaIndex.index.search(document_embedding, 1)
-        scores = scores.flatten()
-        indices = indices.flatten()
-        if scores[0] > 0.6:
-            selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
-            if selectedDescriptor.sign == "bull":
-                average_score+=scores[0]
-                score = float(scores[0])
-            elif selectedDescriptor.sign == "bear":
-                average_score-=scores[0]
-                score = float(scores[0])*-1
+    document_embeddings = initializedFinaIndex.encodeChunks(chunks)
+    faiss.normalize_L2(document_embeddings)
 
-            chunk_analysis = {"chunk":chunk,
-                            "sign":selectedDescriptor.sign,
-                            "indicator":selectedDescriptor.indicator,
-                            "description":selectedDescriptor.description,
-                            "score":score}
+    distances, indices = initializedFinaIndex.index.search(document_embeddings, 1)
+
+    max_scores = distances.flatten()
+    indices = indices.flatten()
+
+    selectedDescriptors = [
+        initializedFinaIndex.final_descriptors[index] for index in indices
+    ]
+
+    for descriptor_index, selectedDescriptor in enumerate(selectedDescriptors):
+        if selectedDescriptor.sign == "bull":
+            average_score += max_scores[descriptor_index]
+            score = float(max_scores[descriptor_index])
+        elif selectedDescriptor.sign == "bear":
+            average_score += max_scores[descriptor_index]
+            score = float(max_scores[descriptor_index])
+
+        if score > 0.6:
+            chunk_analysis = {
+                "chunk": chunks[descriptor_index],
+                "sign": selectedDescriptor.sign,
+                "indicator": selectedDescriptor.indicator,
+                "description": selectedDescriptor.description,
+                "score": score,
+            }
 
             chunks_analysis.append(chunk_analysis)
 
-    output_dict = {"chunks":chunks_analysis,
-                "average_score":average_score,
-                "average_sign":"bull" if average_score > 0 else "bear",
-                "datetime":datetime,
-                "api_key": api_key,
-                "customer_id": customer_db_id
-                }
+    output_dict = {
+        "chunks": chunks_analysis,
+        "average_score": average_score,
+        "average_sign": "bull" if average_score > 0 else "bear",
+        "date": date,
+        "api_key": api_key,
+        "customer_id": customer_db_id,
+    }
 
-    intramove_db["article"].insert_one(output_dict,)
+    intramove_db["articles"].insert_one(
+        output_dict,
+    )
 
     del output_dict["_id"]
     del output_dict["api_key"]
@@ -432,11 +513,19 @@ def analyzeArticle( api_key: str = Header(),
             json=output_dict,
         )
 
+
 ### SETUP ###
 
 
 def start():
-    uvicorn.run(app, host="0.0.0.0", port=443, log_level="info",ssl_keyfile=os.getenv("SSL_KEYFILE_PATH"),ssl_certfile=os.getenv("SSL_CERTIFICATE_PATH"))
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=443,
+        log_level="info",
+        ssl_keyfile=os.getenv("SSL_KEYFILE_PATH"),
+        ssl_certfile=os.getenv("SSL_CERTIFICATE_PATH"),
+    )
     """import subprocess
 
     # Set the path to the Uvicorn executable
