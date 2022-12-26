@@ -3,6 +3,7 @@ import numpy as np
 from utils import inverse_indicators, phrases, selected_indicators
 from sentence_transformers import SentenceTransformer
 import pickle
+from typing import List
 
 class FinancialDescriptor:
     def __init__(self, description, indicator, embedding, sign):
@@ -21,6 +22,9 @@ class FinancialIndex:
 
     def encodeText(self, text: str):
         return self.model.encode([text], device=self.device)
+
+    def encodeChunks(self, chunks:List[str]):
+        return self.model.encode(chunks, device=self.device)
 
     def generateDescriptions(self) -> tuple:
         bullish_descriptions = []

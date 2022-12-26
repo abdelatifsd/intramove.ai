@@ -2,20 +2,6 @@ import requests
 import json
 from news_data import news_newformat
 
-def magic(batch_date,divider, news_batch):
-    split_data = news_batch.split(divider)
-    headlines = []
-    articles = []
-    date = []
-    for data in split_data:
-        if data != "":
-            headlines.append(data.split("\n")[1])
-            article = " ".join(data.split("\n")[2:]).replace("\n","")
-            articles.append(article)
-            date.append(batch_date)
-
-    return headlines, articles
-
 headers = {
     'accept': 'application/json',
     'Content-Type': 'application/json',
@@ -54,13 +40,14 @@ if not manual:
                                 "callback_url":""}
             requests.post("http://0.0.0.0:8000/analyze/article", headers=headers,params=article_payload)
 else:
-    headline_payload = {"headline":"" ,
+    """headline_payload = {"headline":"Ibovespa Rallies for 5th SessionBrazil Stock Market" ,
                         "datetime":"12/07/2022",
                         "callback_url":""}
-    requests.post("http://0.0.0.0:8000/analyze/headline", headers=headers,params=headline_payload)
-
-    manual_article = ""
-    article_payload = {"article":manual_article,
+    response = requests.post("http://0.0.0.0:8000/analyze/headline", headers=headers,params=headline_payload)
+    print(response.json())"""
+    article = """The S&P/TSX Composite index extended early advances and closed 0.8% higher at 19,500 on Friday, notching a 0.3% increase on the week and outperforming its US counterparts with gains for energy producers and banks. In the meantime, investors digested domestic growth data, pointing to a stall in November and confirming that the Canadian economy expanded by 0.1% in October as growth in services-producing industries offset losses for goods-producing industries. Oil companies soared 4% to lead the gains in the session, tracking the second consecutive weekly increase for crude oil benchmarks. Toronto’s heavyweight banking and mining sectors also booked gains. On the other hand, concerns about tighter monetary policy continued to press the technology sector, leading losses for the day with a 3% slide for Shopify. The Toronto Exchange will be closed on Monday and Tuesday for holidays."""
+    article_payload = {"article":article,
             "datetime":"12/07/2022",
             "callback_url":""}
-    requests.post("http://0.0.0.0:8000/analyze/article", headers=headers,params=article_payload)
+    response = requests.post("http://0.0.0.0:8000/analyze/article", headers=headers,params=article_payload)
+    print(response.json())

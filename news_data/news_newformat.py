@@ -87,4 +87,4 @@ The S&P/TSX Composite index hovered at the flatline at the 19,350 mark on Friday
 articles, headlines =  new_magic(news_string)
 
 
-news_cache = {"12/23/2022":{"headlines":headlines,"articles":articles}}
+news_cache = {"12/27/2022":{"headlines":headlines,"articles":articles}}

@@ -1,11 +1,12 @@
 from service import FinancialIndex
-from utils.chunker import chunker_api
+from utils.chunker import advanced_chunker
 
 import datetime, requests, os, argparse, subprocess, logging, json
 from typing import BinaryIO, Union
 
 from sentence_transformers import SentenceTransformer
 import pandas as pd
+import faiss 
 
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, Query
@@ -89,34 +90,38 @@ def analyzeArticle(article: str = Query(),
                     datetime: str = Query(),
                     callback_url: str = Query()):
 
-    chunked_text = chunker_api(article)
+    chunks = advanced_chunker(article)
     chunks_analysis = [] # text:results
     average_score  = 0
 
-    for chunk in chunked_text:
-        document_embedding = initializedFinaIndex.encodeText(
-            chunk
+    document_embeddings = initializedFinaIndex.encodeChunks(
+            chunks
         )
-        scores, indices = initializedFinaIndex.index.search(document_embedding, 1)
-        scores = scores.flatten()
-        indices = indices.flatten()
-        if scores[0] > 0.6:
-            selectedDescriptor = initializedFinaIndex.final_descriptors[indices[0]]
-            if selectedDescriptor.sign == "bull":
-                average_score+=scores[0]
-                score = float(scores[0])
-            elif selectedDescriptor.sign == "bear":
-                average_score-=scores[0]
-                score = float(scores[0])*-1
+    faiss.normalize_L2(document_embeddings)
 
-            chunk_analysis = {"chunk":chunk,
+    distances, indices = initializedFinaIndex.index.search(document_embeddings, 1)
+
+    max_scores = distances.flatten()
+    indices = indices.flatten()
+    
+    selectedDescriptors = [initializedFinaIndex.final_descriptors[index] for index in indices]
+
+    for descriptor_index, selectedDescriptor in enumerate(selectedDescriptors):
+        if selectedDescriptor.sign == "bull":
+            average_score+=max_scores[descriptor_index]
+            score = float(max_scores[descriptor_index])
+        elif selectedDescriptor.sign == "bear":
+            average_score+=max_scores[descriptor_index]
+            score = float(max_scores[descriptor_index])
+
+        if score > 0.5:
+            chunk_analysis = {"chunk":chunks[descriptor_index],
                             "sign":selectedDescriptor.sign,
                             "indicator":selectedDescriptor.indicator,
                             "description":selectedDescriptor.description,
                             "score":score}
 
             chunks_analysis.append(chunk_analysis)
-
 
     output_dict = {"chunks":chunks_analysis,
                 "average_score":average_score,
