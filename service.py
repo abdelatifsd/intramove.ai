@@ -3,6 +3,7 @@ import numpy as np
 from utils import inverse_indicators, phrases, selected_indicators
 from sentence_transformers import SentenceTransformer
 import pickle
+from typing import List
 
 class FinancialDescriptor:
     def __init__(self, description, indicator, embedding, sign):
@@ -11,6 +12,7 @@ class FinancialDescriptor:
         self.embedding = embedding
         self.sign = sign
         self.score = None
+
 
 class FinancialIndex:
     def __init__(self, device: str, load: bool):
@@ -21,6 +23,9 @@ class FinancialIndex:
 
     def encodeText(self, text: str):
         return self.model.encode([text], device=self.device)
+    
+    def encodeChunks(self, chunks:List[str]):
+        return self.model.encode(chunks, device=self.device)
 
     def generateDescriptions(self) -> tuple:
         bullish_descriptions = []
@@ -39,16 +44,18 @@ class FinancialIndex:
 
         for i, indicator in enumerate(indicators):
             if indicator in inverse_relation_indicators:
-                indicator_specific_bullish_phrases =  ["decreased", "eased up"]
-                indicator_specific_bearish_phrases =  ["increased", "edged higher"]
+                indicator_specific_bullish_phrases = ["decreased", "eased up"]
+                indicator_specific_bearish_phrases = ["increased", "edged higher"]
                 for bull_phrase in indicator_specific_bullish_phrases:
                     bullish_descriptions.append(f"{indicator}-{bull_phrase}")
                 for bear_phrase in indicator_specific_bearish_phrases:
                     bearish_descriptions.append(f"{indicator}-{bear_phrase}")
 
                 if indicator == "interest rates" or indicator == "rate hikes":
-                    bearish_descriptions.append(f"{indicator}-expected to tighten further")
-            else:    
+                    bearish_descriptions.append(
+                        f"{indicator}-expected to tighten further"
+                    )
+            else:
                 for bull_phrase in phrases.bullish_phrases:
                     bullish_descriptions.append(f"{indicator}-{bull_phrase}")
 
@@ -69,7 +76,10 @@ class FinancialIndex:
             description_embedding = self.encodeText(description)
 
             fblob = FinancialDescriptor(
-                description=description, indicator = indicator, embedding=description_embedding, sign="bull"
+                description=description,
+                indicator=indicator,
+                embedding=description_embedding,
+                sign="bull",
             )
             bullish_descriptors.append(fblob)
 
@@ -78,26 +88,36 @@ class FinancialIndex:
             description = description.replace("-", " ")
             description_embedding = self.encodeText(description)
             fblob = FinancialDescriptor(
-                description=description,indicator = indicator, embedding=description_embedding, sign="bear"
+                description=description,
+                indicator=indicator,
+                embedding=description_embedding,
+                sign="bear",
             )
             bearish_descriptors.append(fblob)
         return bullish_descriptors, bearish_descriptors
 
-    def generateFinancialIndex(self, load:bool=False):
+    def generateFinancialIndex(self, load: bool = False):
         if not load:
-            bullish_descriptors, bearish_descriptors = self.generateFinancialDescriptors()
+            (
+                bullish_descriptors,
+                bearish_descriptors,
+            ) = self.generateFinancialDescriptors()
             self.final_descriptors = bullish_descriptors + bearish_descriptors
-            with open('data/final_descriptors.pickle', 'wb') as pkl:
+            with open("data/final_descriptors.pickle", "wb") as pkl:
                 pickle.dump(self.final_descriptors, pkl)
-            final_embeddings = [blob.embedding.squeeze() for blob in self.final_descriptors]
+            final_embeddings = [
+                blob.embedding.squeeze() for blob in self.final_descriptors
+            ]
             final_embeddings = np.array(final_embeddings)
             index = faiss.IndexFlatIP(final_embeddings.shape[1])
             faiss.normalize_L2(final_embeddings)
             index.add(final_embeddings)
         else:
-            with open('data/final_descriptors.pickle', 'rb') as pkl:
+            with open("data/final_descriptors.pickle", "rb") as pkl:
                 self.final_descriptors = pickle.load(pkl)
-            final_embeddings = [blob.embedding.squeeze() for blob in self.final_descriptors]
+            final_embeddings = [
+                blob.embedding.squeeze() for blob in self.final_descriptors
+            ]
             final_embeddings = np.array(final_embeddings)
             index = faiss.IndexFlatIP(final_embeddings.shape[1])
             faiss.normalize_L2(final_embeddings)

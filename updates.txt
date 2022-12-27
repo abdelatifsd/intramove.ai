@@ -1,4 +1,40 @@
 ### Update ideas ###
 
-* Production branch to run publicly
-* Storing clients news and articles and using those later on
+* Stripe branch [DONE]
+* Update success/failure urls [DONE]
+* Make credit/call system work [DONE]
+* Create new Mongo DB clusters and schemas (for headlines data and customer data) [DONE]
+* Store all necessary variables in .env [DONE]
+* Add webhook security layer [DONE]
+* Create python library that can communicate with the service [DONE]
+
+* Add more functionality for the user  [DONE]
+* Enable callbacks [DONE]
+* Package the lib into pip [DONE]
+* Perform different local tests [DONE]
+
+* Buy and figure out how to attach DNS [DONE]
+* run application oni a live AWS instance [Done]
+* Update DNS in pypi package [DONE]
+* Test calling it [DONE]
+* Update env vars with production keys for all services [DONE]
+* Create pricing/packaging plan [DONE]
+* Perform live testing with friends (Drop price) (0.5$ - 100 calls) [DONE]
+* Figure out live bug [DONE]
+* Check aws bill [DONE]
+* Finalize live testing with friends
+* Discuss project with Martin
+
+* Prepare documentation/blog for developers (CURL commands for language neutral instruction)
+* Make a blog or a simple demo site
+* Prepare a video to share on Linkedin
+* Make updates on Linkedin
+* Share with public as a Alpha v1 release
+
+Optimization
+* Separate payment service from AI service (micro-services architecture)
+* Create signup-auth service with frontend stuff?
+* Adding article analysis endpoint (figure chunker out)
+* Think about using celery to queue tasks
+* Use Redis for caching
+* Think about minimizing communication between DB and APP + the usage of caching for speedup

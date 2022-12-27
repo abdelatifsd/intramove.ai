@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  intramove:
+    image: abdellatifsd/intramove:v1
+    command: bash -c "make server"
+    volumes:
+      - ./app:/usr/src/app
+      - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
+    ports:
+      - "9999:9999"
+    restart: always

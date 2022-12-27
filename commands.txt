@@ -1,0 +1,40 @@
+docker
+
+docker buildx build --platform=linux/amd64 -t abdellatifsd/intramove:v1 .
+docker push abdellatifsd/intramove:v1
+
+EC2
+ssh -i "/Users/abdellatif/.ssh/intramove_ec2.pem" ubuntu@35.183.123.36
+sudo apt-get update
+sudo apt-get install build-essential checkinstall
+
+EC2 docker
+
+sudo yum install docker
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+Github 
+ssh-keygen -t rsa -b 4096 -C "abdulatifsal@gmail.com"
+Add key to github
+git clone git@github.com:abdelatifsd/intramove.ai.git --branch stripe
+
+VENV
+apt-get install python3.9-venv
+
+Vectors
+scp -i "/Users/abdellatif/.ssh/intramove_ec2.pem" -r  /Users/abdellatif/Desktop/Personal/intramove.ai/data/final_descriptors.pickle ubuntu@35.183.123.36:intramove.ai/data/
+
+Stripe
+https://stripe.com/docs/stripe-cli
+
+MongoDB 
+add .pem mongodb file to ssh folder
+
+TLS
+sudo apt-get install certbot
+sudo certbot certonly --standalone -d intramove.com
+sudo certbot certonly --debug --standalone -d intramove.com
+
+sudo apt-get install authbind
+

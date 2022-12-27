@@ -1,6 +1,11 @@
-keybert==0.6.0
-faiss-cpu==1.6.5
-fast-api
+faiss-cpu
+sentence-transformers
+fastapi
 uvicorn
 pydantic
 python -m pip install "pymongo[srv]"
+black
+stripe
+python-dotenv
+numpy
+bson

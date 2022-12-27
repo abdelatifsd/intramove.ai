@@ -11,7 +11,9 @@ Credit Rating,
 Commodity,
 Currency,
 Government Bond 10Y,
-Stock Market - Stocks - Shares,
+Stock Market,
+Stocks,
+Shares,
 Capacity Utilization,
 Balance of Trade,
 Capital Flows,
@@ -148,5 +150,13 @@ Commodity Supplies,
 Rate Hikes
 """
 
-indicators_cache = {"inflation":["Core Inflation Rate","Food Inflation", "Harmonised Inflation Rate MoM", "Harmonised Inflation Rate YoY", "Inflation Expectations" "Inflation Rate MoM",
-    "Producer Price Inflation MoM",]}
+indicators_cache = {
+    "inflation": [
+        "Core Inflation Rate",
+        "Food Inflation",
+        "Harmonised Inflation Rate MoM",
+        "Harmonised Inflation Rate YoY",
+        "Inflation Expectations" "Inflation Rate MoM",
+        "Producer Price Inflation MoM",
+    ]
+}
