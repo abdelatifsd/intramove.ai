@@ -18,7 +18,7 @@ import bson
 from dotenv import load_dotenv
 
 logging.getLogger().setLevel(logging.INFO)
-load_dotenv() 
+load_dotenv(".envlocal") 
 
 def initMongo():
     
