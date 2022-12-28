@@ -26,7 +26,7 @@ from pymongo import MongoClient
 import stripe
 
 logging.getLogger().setLevel(logging.INFO)
-load_dotenv()
+load_dotenv(".env")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 # stripe listen --forward-to=localhost:443/webhook
