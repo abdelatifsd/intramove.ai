@@ -22,7 +22,7 @@
 * Perform live testing with friends (Drop price) (0.5$ - 100 calls) [DONE]
 * Figure out live bug [DONE]
 * Check aws bill [DONE]
-* Finalize live testing with friends
+* Finalize live testing with friends [DONE]
 * Discuss project with Martin
 
 * Prepare documentation/blog for developers (CURL commands for language neutral instruction)

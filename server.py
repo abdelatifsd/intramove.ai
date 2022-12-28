@@ -39,7 +39,6 @@ product_id_to_name_map = {
     "prod_N3UFpCDcp0Hisv": "articles-100",
 }
 
-
 def initMongo():
     uri = os.getenv("MONGO_DB_URI")
     cert_path = os.path.expanduser(os.getenv("MONGO_DB_CERT_PATH"))
