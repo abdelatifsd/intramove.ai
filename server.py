@@ -111,8 +111,8 @@ def analyzeArticle(article: str = Query(),
             average_score+=max_scores[descriptor_index]
             score = float(max_scores[descriptor_index])
         elif selectedDescriptor.sign == "bear":
-            average_score+=max_scores[descriptor_index]
-            score = float(max_scores[descriptor_index])
+            average_score-=max_scores[descriptor_index]
+            score = float(max_scores[descriptor_index]) * -1
 
         if score > 0.5:
             chunk_analysis = {"chunk":chunks[descriptor_index],
