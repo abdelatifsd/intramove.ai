@@ -12,6 +12,7 @@ certs
 .env
 .env2
 .envlocal
+.envtest
 
 # C extensions
 *.so
