@@ -30,9 +30,10 @@ load_dotenv(".env")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 # stripe listen --forward-to=localhost:443/webhook
-# stripe listen --forward-to=https://intramove.com:443/webhook
+# stripe listen --forward-to=https://intramove.ai:443/webhook
 
-package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100, "prod_N3UFpCDcp0Hisv": 100}
+package_credits_count_map = {"prod_N2ndwwdkNjVThi": 100, 
+                             "prod_N3UFpCDcp0Hisv": 100}
 
 product_id_to_name_map = {
     "prod_N2ndwwdkNjVThi": "headlines-100",
@@ -53,7 +54,6 @@ intramove_db = initMongo()
 
 ### Stripe end points ###
 
-
 @app.post("/checkout")
 def create_checkout_session(product_id: str, quantity: int):
     try:
@@ -70,8 +70,8 @@ def create_checkout_session(product_id: str, quantity: int):
                     "quantity": quantity,
                 }
             ],
-            success_url="https://intramove.com:443/success",
-            cancel_url="https://intramove.com:443/failure",
+            success_url="https://intramove.ai:443/success",
+            cancel_url="https://intramove.ai:443/failure",
             mode="payment",
             customer_creation="always",
             automatic_tax={

@@ -23,7 +23,10 @@
 * Figure out live bug [DONE]
 * Check aws bill [DONE]
 * Finalize live testing with friends [DONE]
-* Discuss project with Martin
+* Discuss project with Martin [DONE]
+* Buy domain name, issue elastic IP, and link to new domain [DONE]
+* Configure instance to work with elastic IP + new domain name [DONE]
+* Test server/client with new domain
 
 * Prepare documentation/blog for developers (CURL commands for language neutral instruction)
 * Make a blog or a simple demo site
@@ -33,8 +36,13 @@
 
 Optimization
 * Separate payment service from AI service (micro-services architecture)
-* Create signup-auth service with frontend stuff?
-* Adding article analysis endpoint (figure chunker out)
-* Think about using celery to queue tasks
-* Use Redis for caching
+    - Create signup-auth service that utilizes JWT
+    - Create a payment/checkout service (authorization happens using JWT obtained in signup/auth service)
+    - Create a DB service
+    - Create an AI service 
+        @ Use Redis for caching client requests
+        @ Use celery to queue tasks
+* Dockerize all applications
+* Docker-compose for installation and serving 
+* Using NGNIX for reverse proxy to route user requests
 * Think about minimizing communication between DB and APP + the usage of caching for speedup

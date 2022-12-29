@@ -4,7 +4,7 @@ docker buildx build --platform=linux/amd64 -t abdellatifsd/intramove:v1 .
 docker push abdellatifsd/intramove:v1
 
 EC2
-ssh -i "/Users/abdellatif/.ssh/intramove_ec2.pem" ubuntu@35.183.123.36
+ssh -i "/Users/abdellatif/.ssh/intramove_ec2.pem" ubuntu@3.97.81.206	
 sudo apt-get update
 sudo apt-get install build-essential checkinstall
 
@@ -33,8 +33,8 @@ add .pem mongodb file to ssh folder
 
 TLS
 sudo apt-get install certbot
-sudo certbot certonly --standalone -d intramove.com
-sudo certbot certonly --debug --standalone -d intramove.com
+sudo certbot certonly -v --standalone -d intramove.ai
+sudo certbot certonly --debug --standalone -d intramove.ai
 
 sudo apt-get install authbind
 
