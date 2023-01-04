@@ -169,6 +169,9 @@ def updateDates():
     intramove_db["headline"].update_many(
         {}, [{"$set": {"datetime": {"$toDate": "$datetime"}}}]
     )
+    intramove_db["article"].update_many(
+        {}, [{"$set": {"datetime": {"$toDate": "$datetime"}}}]
+    )
 
     
 @app.post("/database/update/timezone")
