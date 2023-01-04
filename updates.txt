@@ -26,16 +26,16 @@
 * Discuss project with Martin [DONE]
 * Buy domain name, issue elastic IP, and link to new domain [DONE]
 * Configure instance to work with elastic IP + new domain name [DONE]
-* Test server/client with new domain
+* Test server/client with new domain [DONE]
 
-* Prepare documentation/blog for developers (CURL commands for language neutral instruction)
-* Make a blog or a simple demo site
-* Prepare a video to share on Linkedin
-* Make updates on Linkedin
-* Share with public as a Alpha v1 release
+* Prepare documentation/blog for developers (CURL commands for language neutral instruction) [DONE]
+* Make a blog or a simple demo site [DONE]
+* Prepare a video to share on Linkedin [DONE]
+* Make updates on Linkedin [DONE]
+* Share with public as a Alpha v1 release [DONE]
 
-Optimization
-* Separate payment service from AI service (micro-services architecture)
+Next steps
+* Split domain (frontend and backend?). Backend could be: api.intramove.ai while frontend could be www.intramove.ai [DONE]
     - Create signup-auth service that utilizes JWT
     - Create a payment/checkout service (authorization happens using JWT obtained in signup/auth service)
     - Create a DB service

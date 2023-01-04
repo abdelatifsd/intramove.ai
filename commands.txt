@@ -35,6 +35,8 @@ TLS
 sudo apt-get install certbot
 sudo certbot certonly -v --standalone -d intramove.ai
 sudo certbot certonly --debug --standalone -d intramove.ai
+sudo certbot certonly -v --standalone -d api.intramove.ai
+sudo certbot renew --dry-run
 
 sudo apt-get install authbind
 
