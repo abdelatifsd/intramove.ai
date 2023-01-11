@@ -8,7 +8,7 @@ headers = {
 }
 
 ### CHECK THIS FIRST ###
-manual = False
+manual = True
 ### CHECK THIS FIRST ###
 
 

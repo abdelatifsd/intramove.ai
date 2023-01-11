@@ -181,8 +181,11 @@ def updateTimezone():
     gmt_tz = pytz.timezone('GMT')
     est_tz = pytz.timezone('EST')
 
+    # Set the threshold date
+    threshold_date = datetime(2023, 1, 8)
+
     # Find the documents with dates in GMT
-    query = {'datetime': {'$exists': True}}
+    query = {'datetime': {'$exists': True, '$gt': threshold_date}}
     projection = {'_id': 1, 'datetime': 1}
     article_gmt_documents = intramove_db["article"].find(query, projection)
     headline_gmt_documents = intramove_db["headline"].find(query, projection)
