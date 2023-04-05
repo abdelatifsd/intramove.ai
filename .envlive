@@ -1,9 +1,0 @@
-SENTENCE_TRANSFORMER_MODEL=all-mpnet-base-v2
-CHUNKER_API=https://api.repustate.com/v4/12856c614b13af33f55ffb8ac5b3838f724d21da57d024970481973f/chunk.json
-MONGO_DB_URI=mongodb+srv://intramove.nknhkoj.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority
-MONGO_DB_CERT_PATH=~/.ssh/X509-cert-2141345611657965634.pem
-STRIPE_SECRET_KEY=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
-STRIPE_WEBHOOK_SECRET=whsec_zA01VKVtzrUAVuLAgrvVKAj37xPTjryA 
-SSL_KEYFILE_PATH=/etc/letsencrypt/live/intramove.com/privkey.pem
-SSL_CERTIFICATE_PATH=/etc/letsencrypt/live/intramove.com/fullchain.pem
-UVICORN_PATH=/home/ubuntu/intramove.ai/env/bin/uvicorn
